@@ -21,12 +21,12 @@
   },
   "autoload": {
     "psr-4" : {
-      "BazaarvoiceRequests\\" : "src/"
+      "BazaarvoiceRequest\\" : "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "BazaarvoiceRequests\\Tests\\": "tests/"
+      "BazaarvoiceRequest\\Tests\\": "tests/"
     }
   },
 }
