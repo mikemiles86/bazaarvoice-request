@@ -2,16 +2,22 @@
 
 namespace BazaarvoiceRequest;
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+
 class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
 
   private static $api_version = '5.4';
+  protected $client;
   protected $domain = 'api.bazaarvoice.com';
   protected $apiKey;
   protected $use_stage = FALSE;
-  protected $errors;
+  protected $errors = [];
 
 
-  public function __construct($apiKey, $use_stage = FALSE) {
+  public function __construct(ClientInterface $client, $apiKey, $use_stage = FALSE) {
+    $this->client = $client;
     $this->apiKey = $apiKey;
     $this->use_stage = ($use_stage === TRUE);
     $this->errors = [];
@@ -41,21 +47,21 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       $request_options = array_merge_recursive($request_options, $options);
     }
 
-    // Create a new Guzzle client object
-    $client = new GuzzleHttp\Client($request_options);
     $response_data = NULL;
     // Attempt to get a response.
     try {
-      $response = $client->request($method, $request_url);
+      $response = $this->client->request($method, $request_url, $request_options);
       $status_code = $response->getStatusCode();
-      $stream_size = $response->getBody()->getSize();
-      $response_data = Json::decode($response->getBody()->read($stream_size));
+      $response_body = $response->getBody();
+      $stream_size = $response_body->getSize();
+      $response_data = json_decode($response_body->read($stream_size), TRUE);
       if ($status_code < 200 || $status_code > 299) {
-        throw new ConnectorException($data['message'], $data['code'], $data);
+        $response_data['HasErrors'] = TRUE;
+        $response_data['Errors'][$response_data['code']] = $response_data['message'];
       }
     }
     catch (RequestException $e) {
-      //@TODO: what to do with this expection?
+      //@TODO: what to do with this exception?
     }
 
     // Were there errors?
