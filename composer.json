@@ -1,0 +1,32 @@
+{
+  "name": "mikemiles86/bazaarvoice-request",
+  "type": "library",
+  "description": "PHP library for making requests to Bazaarvoice API.",
+  "keywords": [
+    "bazaarvoice"
+  ],
+  "homepage": "https://github.com/mikemiles86/bazaarvoice-request",
+  "license": "MIT",
+  "authors": [{
+    "name": "Michael Miles",
+    "email": "mikemiles86@gmail.com"
+  }],
+  "require": {
+    "php": ">=5.5",
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "require-dev": {
+    "ext-curl": "*",
+    "phpunit/phpunit": "^4.0 || ^5.0",
+  },
+  "autoload": {
+    "psr-4" : {
+      "BazaarvoiceRequests\\" : "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "BazaarvoiceRequests\\Tests\\": "tests/"
+    }
+  },
+}
