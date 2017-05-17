@@ -3,10 +3,6 @@
 namespace BazaarvoiceRequest\Tests;
 
 use BazaarvoiceRequest\BazaarvoiceRequest;
-use Doctrine\Instantiator\Exception\InvalidArgumentException;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Stream;
 
 class RequestTest extends \PHPUnit_Framework_TestCase {
 
@@ -49,7 +45,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 
   }
 
-  public function testReturnsNull() {
+  public function testBadRequestReturnsNull() {
     $data = [
       'message' => 'Error Message',
       'code' => 999,
@@ -59,7 +55,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     $this->assertNull($request->apiRequest('some/endpoint'));
   }
 
-  public function testReturnsErrors() {
+  public function testErrorResponseReturnsErrors() {
     $data = [
       'HasErrors' => TRUE,
       'Errors' => ['Invalid Request', 'Second Error'],
@@ -70,7 +66,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     $this->assertNotEmpty($request->getRequestErrors());
   }
 
-  public function testReturnsNoErrors() {
+  public function testValidResponseReturnsNoErrors() {
     $data = [
       'content' => 'hello world',
     ];
@@ -80,7 +76,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     $this->assertEmpty($request->getRequestErrors());
   }
 
-  public function testReturnsJSON() {
+  public function testValidResponseParsesAndReturnsJSON() {
     $data = [
       'content' => 'hello world'
     ];
@@ -88,5 +84,13 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     $request = new BazaarvoiceRequest($client, '1234ABC');
     $response = $request->apiRequest('some/endpoint');
     $this->assertSame($data, $response);
+  }
+
+  public function testMalformedDataResponseReturnsNull() {
+    $bad_data = "{this:`isbad`]";
+    $client = $this->mockClient($bad_Data, 200);
+    $request = new BazaarvoiceRequest($client, '1234ABC');
+    $response = $request->apiRequest('some/endpoint');
+    $this->assertNull($response);
   }
 }

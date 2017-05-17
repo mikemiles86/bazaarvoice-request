@@ -2,6 +2,10 @@
 
 namespace BazaarvoiceRequest;
 
+/**
+ * Interface BazaarvoiceRequestInterface
+ * @package BazaarvoiceRequest
+ */
 interface BazaarvoiceRequestInterface {
 
   /**

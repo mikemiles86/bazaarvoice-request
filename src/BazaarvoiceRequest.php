@@ -3,9 +3,12 @@
 namespace BazaarvoiceRequest;
 
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 
+/**
+ * Class BazaarvoiceRequest
+ * @package BazaarvoiceRequest
+ */
 class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
 
   private static $api_version = '5.4';
@@ -50,12 +53,19 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     $response_data = NULL;
     // Attempt to get a response.
     try {
+      // Make request and get response object.
       $response = $this->client->request($method, $request_url, $request_options);
+      // Get the status code of the response.
       $status_code = $response->getStatusCode();
+      // Get the body content.
       $response_body = $response->getBody();
+      // Get the stream size.
       $stream_size = $response_body->getSize();
+      // Attempt to json decode the content.
       $response_data = json_decode($response_body->read($stream_size), TRUE);
+      // Returned status code not 200?
       if ($status_code < 200 || $status_code > 299) {
+        // Set error.
         $response_data['HasErrors'] = TRUE;
         $response_data['Errors'][$response_data['code']] = $response_data['message'];
       }
