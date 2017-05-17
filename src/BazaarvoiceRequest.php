@@ -26,9 +26,11 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     $this->errors = [];
   }
 
-  public function apiRequest($endpoint, array $parameters = [], $method = 'GET', array $options = []) {
+  public function apiRequest($endpoint, array $configuration = []) {
+    // Get request method, arguments and options
+    list($method, $arguments, $options) = $this->splitConfiguration($configuration);
     // Get the URL for the request.
-    $request_url = $this->buildUrl($endpoint, $parameters);
+    $request_url = $this->buildUrl($endpoint, $arguments);
     // Build HTTP Request options.
     $method = ($method == 'POST' ? 'POST' : 'GET');
     $request_options = array(
@@ -132,6 +134,30 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
 
     // return the built url.
     return $base . '/' . $endpoint . '.json?' . $parameters;
+  }
+
+  private function splitConfiguration(array $options) {
+    $return_array = [
+      'method' => 'GET',
+      'arguments' => [],
+      'options' => [],
+    ];
+
+    // Request method passed?
+    if (isset($options['method'])) {
+      $return_array['method'] = $options['method'];
+    }
+    // URL arguments passed?
+    if (isset($options['arguments'])) {
+      $return_array['arguments'] = $options['arguments'];
+    };
+
+    // Request options passed?
+    if (isset($options['options'])) {
+      $return_array['options'] = $options['options'];
+    }
+
+    return array_values($return_array);
   }
 
 }
