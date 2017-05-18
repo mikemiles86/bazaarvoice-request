@@ -1,6 +1,6 @@
 <?php
 
-namespace BazaarvoiceRequest;
+namespace BazaarvoiceRequest\Request;
 
 /**
  * Interface BazaarvoiceRequestInterface
@@ -26,10 +26,4 @@ interface BazaarvoiceRequestInterface {
    */
   public function apiRequest($endpoint, array $configuration = []);
 
-  /**
-   * Return errors from a given API request.
-   *
-   * @return mixed
-   */
-  public function getRequestErrors();
 }

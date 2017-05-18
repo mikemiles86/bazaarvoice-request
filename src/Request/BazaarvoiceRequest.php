@@ -1,6 +1,6 @@
 <?php
 
-namespace BazaarvoiceRequest;
+namespace BazaarvoiceRequest\Request;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
@@ -16,7 +16,6 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
   protected $domain = 'api.bazaarvoice.com';
   protected $apiKey;
   protected $use_stage = FALSE;
-  protected $errors = [];
 
 
   public function __construct(ClientInterface $client, $apiKey, $use_stage = FALSE) {
@@ -26,8 +25,8 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     $this->errors = [];
   }
 
-  public function apiRequest($endpoint, array $configuration = []) {
-    // Get request method, arguments and options
+  public function apiRequest($endpoint, array $configuration = [], $response_type = "BazaarvoiceRequest\\Response\\BazaarvoiceResponse") {
+    // Get request method, arguments and options.
     list($method, $arguments, $options) = $this->splitConfiguration($configuration);
     // Get the URL for the request.
     $request_url = $this->buildUrl($endpoint, $arguments);
@@ -52,7 +51,7 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       $request_options = array_merge_recursive($request_options, $options);
     }
 
-    $response_data = NULL;
+    $response_data = [];
     // Attempt to get a response.
     try {
       // Make request and get response object.
@@ -64,7 +63,10 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       // Get the stream size.
       $stream_size = $response_body->getSize();
       // Attempt to json decode the content.
-      $response_data = json_decode($response_body->read($stream_size), TRUE);
+      $data = json_decode($response_body->read($stream_size), TRUE);
+      if (is_array($data)) {
+        $response_data = $data;
+      }
       // Returned status code not 200?
       if ($status_code < 200 || $status_code > 299) {
         // Set error.
@@ -76,28 +78,8 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       //@TODO: what to do with this exception?
     }
 
-    // Were there errors?
-    if (isset($response_data['HasErrors']) && $response_data['HasErrors']) {
-      // Form errors?
-      if (!empty($response_data['FormErrors'])) {
-        $this->errors = $response_data['FormErrors'];
-      }
-      // Else general errors?
-      elseif (!empty($response_data['Errors'])) {
-        $this->errors = $response_data['Errors'];
-      }
-      // Set data to NULL.
-      $response_data = NULL;
-    }
-
-    return $response_data;
-  }
-
-  /**
-   * Overrides getRequestErrors().
-   */
-  public function getRequestErrors() {
-    return $this->errors;
+    $response = $this->buildResponse($response_type, $method, $status_code, $request_url, $configuration, $response_data);
+    return $response;
   }
 
   private function buildUrl($endpoint, array $additional_parameters = []) {
@@ -158,6 +140,23 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     }
 
     return array_values($return_array);
+  }
+
+  private function buildResponse($response_type, $method, $status_code, $request_url, array $configuration = [], array $response_data = []) {
+    $object = FALSE;
+    // Check that a string was passed.
+    if (is_string($response_type)) {
+      // Check to see if this class exists.
+      if (class_exists($response_type)) {
+        // Check that this class extends the ContentTypeBase class.
+        if (is_subclass_of($response_type, 'BazaarvoiceRequest\\Response\\BazaarvoiceResponseBase')) {
+          // Instantiate object of this class.
+          $object = new $response_type($method, $status_code, $request_url, $configuration, $response_data);
+        }
+      }
+    }
+
+    return $object;
   }
 
 }

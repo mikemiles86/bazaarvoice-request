@@ -2,7 +2,7 @@
 
 namespace BazaarvoiceRequest\Tests;
 
-use BazaarvoiceRequest\BazaarvoiceRequest;
+use BazaarvoiceRequest\Request\BazaarvoiceRequest;
 
 class RequestTest extends \PHPUnit_Framework_TestCase {
 
@@ -45,14 +45,36 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 
   }
 
-  public function testBadRequestReturnsNull() {
+  public function testValidResponseObject() {
+    $data = [
+      'content' => 'hello world'
+    ];
+    $client = $this->mockClient(json_encode($data), 200);
+    $request = new BazaarvoiceRequest($client, '1234abc');
+    $response = $request->apiRequest('some/endpoint');
+    $this->assertInstanceOf('BazaarvoiceRequest\Response\BazaarvoiceResponseBase', $response);
+  }
+
+  public function testInvalidResponseObject() {
+    $data = [
+      'content' => 'hello world'
+    ];
+    $client = $this->mockClient(json_encode($data), 200);
+    $request = new BazaarvoiceRequest($client, '1234abc');
+    $response_type = substr( md5(rand()), 0, 8);
+    $response = $request->apiRequest('some/endpoint', [], $response_type);
+    $this->assertNotInstanceOf('BazaarvoiceRequest\Response\BazaarvoiceResponseBase', $response);
+  }
+
+  public function testBadRequestReturnsError() {
     $data = [
       'message' => 'Error Message',
       'code' => 999,
     ];
     $client = $this->mockClient(json_encode($data), 500);
     $request = new BazaarvoiceRequest($client, '1234abc');
-    $this->assertNull($request->apiRequest('some/endpoint'));
+    $response = $request->apiRequest('some/endpoint');
+    $this->assertTrue($response->hasErrors());
   }
 
   public function testErrorResponseReturnsErrors() {
@@ -62,8 +84,8 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     ];
     $client = $this->mockClient(json_encode($data), 200);
     $request = new BazaarvoiceRequest($client, '1234abc');
-    $request->apiRequest('some/endpoint');
-    $this->assertNotEmpty($request->getRequestErrors());
+    $response = $request->apiRequest('some/endpoint');
+    $this->assertNotEmpty($response->getErrors());
   }
 
   public function testValidResponseReturnsNoErrors() {
@@ -72,8 +94,8 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     ];
     $client = $this->mockClient(json_encode($data), 200);
     $request = new BazaarvoiceRequest($client, '1234ABC');
-    $request->apiRequest('some/endpoint');
-    $this->assertEmpty($request->getRequestErrors());
+    $response = $request->apiRequest('some/endpoint');
+    $this->assertEmpty($response->getErrors());
   }
 
   public function testValidResponseParsesAndReturnsJSON() {
@@ -83,7 +105,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     $client = $this->mockClient(json_encode($data), 200);
     $request = new BazaarvoiceRequest($client, '1234ABC');
     $response = $request->apiRequest('some/endpoint');
-    $this->assertSame($data, $response);
+    $this->assertSame($data, $response->getResponse());
   }
 
   public function testMalformedDataResponseReturnsNull() {
@@ -91,6 +113,6 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     $client = $this->mockClient($bad_Data, 200);
     $request = new BazaarvoiceRequest($client, '1234ABC');
     $response = $request->apiRequest('some/endpoint');
-    $this->assertNull($response);
+    $this->assertEmpty($response->getResponse());
   }
 }
