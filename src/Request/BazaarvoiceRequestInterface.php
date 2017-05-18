@@ -21,9 +21,13 @@ interface BazaarvoiceRequestInterface {
    *     - arguments: URL key/value arguments
    *     - options: Additional request options as defined at http://docs.guzzlephp.org/en/latest/request-options.html
    *
+   * @param string $response_type
+   *  String name of class to load as response object.
+   *  Must be a subclass of BazaarvoiceRequest\Response\BazaarvoiceResponseBase;
+   *
    * @return mixed
    *   Returned data from API call.
    */
-  public function apiRequest($endpoint, array $configuration = []);
+  public function apiRequest($endpoint, array $configuration = [], $response_type = 'BazaarvoiceRequest\\Response\\BazaarvoiceResponse');
 
 }

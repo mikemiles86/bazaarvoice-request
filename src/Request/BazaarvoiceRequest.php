@@ -25,7 +25,7 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     $this->errors = [];
   }
 
-  public function apiRequest($endpoint, array $configuration = [], $response_type = "BazaarvoiceRequest\\Response\\BazaarvoiceResponse") {
+  public function apiRequest($endpoint, array $configuration = [], $response_type = 'BazaarvoiceRequest\\Response\\BazaarvoiceResponse') {
     // Get request method, arguments and options.
     list($method, $arguments, $options) = $this->splitConfiguration($configuration);
     // Get the URL for the request.
@@ -52,6 +52,7 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     }
 
     $response_data = [];
+    $status_code = 500;
     // Attempt to get a response.
     try {
       // Make request and get response object.
@@ -78,10 +79,23 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       //@TODO: what to do with this exception?
     }
 
+    // Build a response object.
     $response = $this->buildResponse($response_type, $method, $status_code, $request_url, $configuration, $response_data);
     return $response;
   }
 
+  /**
+   * Create Bazaarvoice URL with added parameters.
+   *
+   * @param string $endpoint
+   *   API endpoint to call.
+   *
+   * @param array $additional_parameters
+   *   Key/value of url parameters to add to URL.
+   *
+   * @return string
+   *   Formatted API request URL.
+   */
   private function buildUrl($endpoint, array $additional_parameters = []) {
     // Build base domain URI.
     $base = ($this->use_stage ? 'stg.' : '') . $this->domain;
@@ -118,6 +132,14 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     return $base . '/' . $endpoint . '.json?' . $parameters;
   }
 
+  /**
+   * Splits API request options array into main buckets.
+   *
+   * @param array $options
+   *   Key/Value array of api request options.
+   *
+   * @return array
+   */
   private function splitConfiguration(array $options) {
     $return_array = [
       'method' => 'GET',
@@ -142,6 +164,30 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     return array_values($return_array);
   }
 
+  /**
+   * Returns a BazaarvoiceRequest\Response object.
+   *
+   * @param string $response_type
+   *   Class name of response type to load.
+   *
+   * @param string $method
+   *   HTTP request method.
+   *
+   * @param string $status_code
+   *   HTTP request status code.
+   *
+   * @param string $request_url
+   *   URL that request was made to.
+   *
+   * @param array $configuration
+   *   Configuration settings that were used in request.
+   *
+   * @param array $response_data
+   *   Raw data that was returned from response.
+   *
+   * @return bool|mixed
+   *   FALSE or instance of response class.
+   */
   private function buildResponse($response_type, $method, $status_code, $request_url, array $configuration = [], array $response_data = []) {
     $object = FALSE;
     // Check that a string was passed.
