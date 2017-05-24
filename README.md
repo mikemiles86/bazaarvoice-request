@@ -72,6 +72,7 @@ $bazaarvoice_request = new \BazaarvoiceRequest\BazaarvoiceRequest($client, $api_
 $configuration = [
   'arguments' => [
     'ProductId' => 'my_product_123',
+   ],
 ];
 
 $product_reviews = $bazaarvoice_request->->apiRequest('data/reviews', $configuration);
