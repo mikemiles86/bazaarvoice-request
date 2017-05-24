@@ -25,9 +25,25 @@ interface BazaarvoiceRequestInterface {
    *  String name of class to load as response object.
    *  Must be a subclass of BazaarvoiceRequest\Response\BazaarvoiceResponseBase;
    *
-   * @return mixed
-   *   Returned data from API call.
+   * @return \BazaarvoiceRequest\Response\BazaarvoiceResponseInterface
+   *   Returned response object for API call.
    */
   public function apiRequest($endpoint, array $configuration = [], $response_type = 'BazaarvoiceRequest\\Response\\BazaarvoiceResponse');
+
+  /**
+   * Sets boolean use_stage to TRUE.
+   *
+   * @return \BazaarvoiceRequest\Request\BazaarvoiceRequestInterface
+   *   returns request object.
+   */
+  public function useStage();
+
+  /**
+   * Sets boolean use_stage to FALSE.
+   *
+   * @return \BazaarvoiceRequest\Request\BazaarvoiceRequestInterface
+   *   returns request object.
+   */
+  public function useProduction();
 
 }

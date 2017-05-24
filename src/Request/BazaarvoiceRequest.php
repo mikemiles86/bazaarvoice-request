@@ -18,11 +18,22 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
   protected $use_stage = FALSE;
 
 
-  public function __construct(ClientInterface $client, $apiKey, $use_stage = FALSE) {
+  public function __construct(ClientInterface $client, $apiKey) {
     $this->client = $client;
     $this->apiKey = $apiKey;
     $this->use_stage = ($use_stage === TRUE);
     $this->errors = [];
+    return $this;
+  }
+
+  public function useStage() {
+    $this->use_stage = TRUE;
+    return $this;
+  }
+
+  public function useProduction() {
+    $this->use_stage = FALSE;
+    return $this;
   }
 
   public function apiRequest($endpoint, array $configuration = [], $response_type = 'BazaarvoiceRequest\\Response\\BazaarvoiceResponse') {
