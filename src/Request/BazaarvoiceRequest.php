@@ -21,7 +21,6 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
   public function __construct(ClientInterface $client, $apiKey) {
     $this->client = $client;
     $this->apiKey = $apiKey;
-    $this->use_stage = ($use_stage === TRUE);
     $this->errors = [];
     return $this;
   }
@@ -75,7 +74,12 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       // Get the stream size.
       $stream_size = $response_body->getSize();
       // Attempt to json decode the content.
-      $data = json_decode($response_body->read($stream_size), TRUE);
+      if ($stream_size > 0) {
+        $data = json_decode($response_body->read($stream_size), TRUE);
+      }
+      else {
+        $data = json_decode($response_body->getContents(), TRUE);
+      }
       if (is_array($data)) {
         $response_data = $data;
       }
@@ -125,6 +129,7 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
           // Build each sub parameter.
           foreach ($param_value as $sub_param_name => $sub_param_value) {
             // Add to parameters array.
+            $sub_param_value = is_array($sub_param_value) ? implode(",", $sub_param_value) : $sub_param_value;
             $parameters[] = $param_name . '=' . $sub_param_name . ':' . $sub_param_value;
           }
         }
