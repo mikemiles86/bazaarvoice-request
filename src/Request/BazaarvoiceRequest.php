@@ -54,6 +54,14 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
       list($request_url, $request_options['data']) = explode('?', $request_url);
       // Need to fake being a form because how http_request works.
       $request_options['headers'] = array('Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8');
+      if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+      } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+      } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+      }
+      $request_options['headers']['X-Forwarded-For'] = $ip;
     }
 
     // Additional request options?
