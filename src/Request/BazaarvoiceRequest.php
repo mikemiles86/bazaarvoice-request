@@ -51,7 +51,7 @@ class BazaarvoiceRequest implements BazaarvoiceRequestInterface {
     // Want to make a POST request?
     if ($method == 'POST') {
       // Need to split arguments from url and put in body data.
-      list($request_url, $request_options['data']) = explode('?', $request_url);
+      list($request_url, $request_options['body']) = explode('?', $request_url);
       // Need to fake being a form because how http_request works.
       $request_options['headers'] = array('Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8');
       if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
